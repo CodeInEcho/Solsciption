@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+        Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    /* background-image: radial-gradient(circle farthest-side at 50% 100%,
+            rgba(1, 9, 18, 0),
+            rgba(1, 6, 14, 0.6) 36%,
+            rgba(1, 14, 29, 0.6) 55%,
+            rgba(49, 18, 93, 0.4)); */
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* example: override wallet button style */
+.wallet-adapter-button:not([disabled]):hover {
+    background-color: #707070;
+}
+
+@layer components {
+    .border-grey-300 {
+        --tw-border-opacity: 1;
+        border-color: rgb(71 72 77/var(--tw-border-opacity));
+    }
+    .bg-grey-600 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(27 28 31/var(--tw-bg-opacity));
+    }
+    .bg-grey-700 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(19 19 26/var(--tw-bg-opacity));
+    }
+    .bg-grey-800 {
+        --tw-bg-opacity: 1;
+        background-color: rgb(27 29 35/var(--tw-bg-opacity));
+    }
+    .bg-primary-sols {
+        background-color: rgb(255 92 40);
+    }
+    .text-xxs {
+        font-size: .625rem;
+        line-height: 1rem;
+    }
+}
