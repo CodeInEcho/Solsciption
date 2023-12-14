@@ -23,7 +23,7 @@ export const AppBar: React.FC = () => {
                         <Link href="https://solana.com" target="_blank" rel="noopener noreferrer" passHref className="text-secondary hover:text-white">
                             <Image src="/logo.png"  alt="logo icon" width={156} height={96} />
                         </Link>
-                        <NavElement
+                        {/* <NavElement
                             label="Swap"
                             href="/"
                             navigationStarts={() => setIsNavOpen(false)}
@@ -42,8 +42,8 @@ export const AppBar: React.FC = () => {
                             label="sNFT"
                             href="/basics"
                             navigationStarts={() => setIsNavOpen(false)}
-                        />
-                        <div className="text-xs bg-primary-sols py-[2px] px-[4px] rounded-md text-black font-bold">Coming soon</div>
+                        /> */}
+                        {/* <div className="text-xs bg-primary-sols py-[2px] px-[4px] rounded-md text-black font-bold">Coming soon</div> */}
                     </div>
                 </div>
                 <div className="navbar-end">

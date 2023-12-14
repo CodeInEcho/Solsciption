@@ -1,15 +1,15 @@
 // Next, React
-import { FC, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import https from '../../utils/request';
+import { FC, useEffect, useState } from 'react';
 
 // Wallet
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 
 // Components
-import { RequestAirdrop } from '../../components/RequestAirdrop';
 import pkg from '../../../package.json';
+import { RequestAirdrop } from '../../components/RequestAirdrop';
 
 // Store
 import useUserSOLBalanceStore from '../../stores/useUserSOLBalanceStore';
@@ -22,6 +22,12 @@ export const HomeView: FC = ({ }) => {
         {amt:  "1000", op: "mint", p: "spl-20", tick: "pepe", image: "https://cdn.helius-rpc.com/cdn-cgi/image//https://nftstorage.link/ipfs/bafkreig3amgughvyerlt7az4wzeiwa6fbicwoun22dykuq6jrvzntwnxrm" },
     ]
     const { connection } = useConnection();
+    const [ index, setIndex ] = useState(0);
+    const [ status, setStatus ] = useState('split');
+    const [ selectSols, setSelectSols ] = useState({
+        spl20: { tick: '', amt: 0 },
+        inscription: { order: '' },
+    });
     const [ selectTick, setSelectTick ] = useState('');
     const [ assetsSpl20, setAssetsSpl20 ] = useState({});
 
@@ -32,8 +38,8 @@ export const HomeView: FC = ({ }) => {
             method: 'getAssetsByOwner',
             id: '98f58f80-a458-4af1-ad25-981d96098366',
             params: {
-                ownerAddress: '5UB9cTdevNdBqAETaLM9bN8uxra3d8gBrPKnJt4zHmFt',
-                displayOptions: {  showInscription: true },
+                ownerAddress: wallet.publicKey,
+                displayOptions: { showInscription: true },
             },
         });
         const result = response.data.result;
@@ -49,8 +55,22 @@ export const HomeView: FC = ({ }) => {
     }
 
     const selectCollection = (tick: string) => {
+        setIndex(0);
         setSelectTick(tick);
+        if (assetsSpl20[tick]) setSelectSols(assetsSpl20[tick][index]);
         document.getElementById('my_modal_1').close();
+    }
+
+    const changeIndex = (type: string) => {
+        let sIndex = index;
+        if (type === 'add') sIndex++;
+        if (type === 'sub') sIndex--;
+        setIndex(sIndex);
+        setSelectSols(assetsSpl20[selectTick][sIndex]);
+    }
+
+    const swichStatus = () => {
+        status === 'split' ? setStatus('swap') : setStatus('split');
     }
 
     const balance = useUserSOLBalanceStore((s) => s.balance)
@@ -73,16 +93,18 @@ export const HomeView: FC = ({ }) => {
                             <div onClick={() => document.getElementById('my_modal_1').showModal()} className="w-60 h-60 bg-[#2B2D33E3] rounded-lg cursor-pointer"></div>
                         </div>
                     ) : (
-                        <div className="flex items-center flex-col pt-8 pb-6">
+                        <div className="flex items-center flex-col pt-8 pb-6 relative">
+                            { index > 0 && <Image src="/icon_right.png" alt="logo icon" onClick={ () => changeIndex('sub') } className="absolute rotate-180 cursor-pointer left-36 top-[6rem]" width={12} height={12} /> }
                             <Image src="/sols.png" alt="logo icon" className="rounded-lg cursor-pointer" onClick={() => document.getElementById('my_modal_1').showModal()} width={160} height={160} />
-                            <p className="font-bold text-xl py-3">Inscription #229394</p>
-                            <p className="text-sm text-[#BFC4CA] py-1">Spl-20 (Ticker: <b className="text-[#ff5c28]">SOLS</b>  Amount: <b className="text-[#ff5c28]">1000</b>)</p>
+                            { index < assetsSpl20[selectTick].length - 1 && <Image src="/icon_right.png" alt="logo icon" onClick={ () => changeIndex('add') } className="absolute cursor-pointer right-36 top-[6rem]" width={12} height={12} /> }
+                            <p className="font-bold text-xl py-3">Inscription #{ selectSols && selectSols.inscription ? selectSols.inscription.order : ''}</p>
+                            <p className="text-sm text-[#BFC4CA] py-1">Spl-20 (Ticker: <b className="text-[#ff5c28]">{selectSols && selectSols.spl20 ? selectSols.spl20.tick : ''}</b>  Amount: <b className="text-[#ff5c28]">{selectSols && selectSols.spl20 ? selectSols.spl20.amt : ''}</b>)</p>
                             <button className="w-36 mt-3 py-2 rounded-lg text-[#ff5c28] bg-[#131314] font-medium">Enable split</button>
                         </div>
                     ) }
                 </div>
                 <div className="flex justify-center">
-                    <Image src="/switch.png" alt="logo icon" className="cursor-pointer" width={40} height={40} />
+                    <Image src="/switch.png" alt="logo icon" onClick={ () => swichStatus } className="cursor-pointer" width={40} height={40} />
                 </div>
                 <div className="swap-receive">
                     <h2>To receive</h2>
@@ -103,7 +125,6 @@ export const HomeView: FC = ({ }) => {
                 </div>
                 <button className="w-full my-3 py-3 rounded-lg text-black bg-[#ff5c28] font-medium">Split</button>
             </div>
-
             <dialog id="my_modal_1" className="modal" role="dialog">
                 <div className="modal-box bg-[#1a212a] px-0">
                     <div className="px-6">
@@ -112,12 +133,15 @@ export const HomeView: FC = ({ }) => {
                     </div>
                     <div className="colletion-list pt-2">
                         {colletionList && colletionList.map(item => 
-                            (<div key={item.tick} onClick={ () => selectCollection(item.tick) } className="list-items flex py-4 px-6 space-x-3 items-center hover:bg-[#262f3d] cursor-pointer">
-                                <Image src={item.image} alt="logo icon" className="rounded-lg" width={50} height={50} />
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-medium text-white leading-5 truncate">{item.tick}</span>
-                                    <span className="text-xs text-gray-500 dark:text-white-35 leading-5 truncate">Spl-20 (Ticker: <b className="text-[#ff5c28]">{item.tick}</b>  Amount: <b className="text-[#ff5c28]">{item.amt}</b>)</span>
+                            (<div key={item.tick} onClick={ () => selectCollection(item.tick) } className="list-items flex items-center py-4 px-6 hover:bg-[#262f3d] justify-between cursor-pointer">
+                                <div className="flex items-center space-x-3">
+                                    <Image src={item.image} alt="logo icon" className="rounded-lg" width={50} height={50} />
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-medium text-white leading-5 truncate">{item.tick}</span>
+                                        <span className="text-xs text-gray-500 dark:text-white-35 leading-5 truncate">Spl-20 (Ticker: <b className="text-[#ff5c28]">{item.tick}</b>  Amount: <b className="text-[#ff5c28]">{item.amt}</b>)</span>
+                                    </div>
                                 </div>
+                                <div className="text-xs text-[#76859878]">Amount: { assetsSpl20[item.tick] ? assetsSpl20[item.tick].length : 0 }</div>
                             </div>)
                         )}
                     </div>
